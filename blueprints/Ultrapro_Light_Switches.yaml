@@ -4,7 +4,7 @@ blueprint:
   domain: automation
   source_url: https://github.com/OsulivanAB/home-assistant/blob/UltraPro_Light_switches/blueprints/Ultrapro_Light_Switches.yaml
   author: Anthony Bahl (@AnthonyBahl)
-  
+
   input:
     switch:
       name: Switch
@@ -17,7 +17,7 @@ blueprint:
           filter:
             - integration: zwave_js
               manufacturer: UltraPro
-          multiple: true
+          # multiple: true
 
     single_press_delay:
       name: Single Press Delay
