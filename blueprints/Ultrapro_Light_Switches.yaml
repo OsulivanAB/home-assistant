@@ -2,7 +2,6 @@ blueprint:
   name: Ultrapro Light Switches
   description: This blueprint allows you to create automations for the Ultrapro Light Switches.
   domain: automation
-  source_url: https://github.com/OsulivanAB/home-assistant/blob/UltraPro_Light_switches/blueprints/Ultrapro_Light_Switches.yaml
   author: Anthony Bahl (@AnthonyBahl)
 
 input:
