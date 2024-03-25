@@ -6,7 +6,7 @@ blueprint:
   author: Anthony Bahl (@AnthonyBahl)
 
   input:
-    switch:
+    switch_entity: 
       name: Switch
       description: The switch to create automations for.
       selector:
@@ -36,7 +36,7 @@ mode: restart
 
 trigger:
   - platform: device
-    device_id: !input switch
+    device_id: !input switch_entity
     domain: zwave_js
     type: event.value_notification.central_scene
     property: scene
@@ -47,7 +47,7 @@ trigger:
     value: 0
     id: single_press_on
   - platform: device
-    device_id: !input switch
+    device_id: !input switch_entity
     domain: zwave_js
     type: event.value_notification.central_scene
     property: scene
@@ -58,7 +58,7 @@ trigger:
     value: 3
     id: double_press_on
   - platform: device
-    device_id: !input switch
+    device_id: !input switch_entity
     domain: zwave_js
     type: event.value_notification.central_scene
     property: scene
@@ -80,7 +80,7 @@ action:
             metadata: {}
             data: {}
             target:
-              device_id: !input switch
+              device_id: !input switch_entity
 
       - conditions:
           - condition: trigger
@@ -91,4 +91,4 @@ action:
             metadata: {}
             data: {}
             target:
-              device_id: !input switch
+              device_id: !input switch_entity
