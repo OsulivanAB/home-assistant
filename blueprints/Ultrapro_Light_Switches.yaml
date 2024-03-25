@@ -17,7 +17,6 @@ blueprint:
           filter:
             - integration: zwave_js
               manufacturer: UltraPro
-          # multiple: true
 
     single_press_delay:
       name: Single Press Delay
