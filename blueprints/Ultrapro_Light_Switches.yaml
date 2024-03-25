@@ -1,0 +1,95 @@
+blueprint:
+  name: Ultrapro Light Switches
+  description: This blueprint allows you to create automations for the Ultrapro Light Switches.
+  domain: automation
+  source_url: https://github.com/OsulivanAB/home-assistant/blob/UltraPro_Light_switches/blueprints/Ultrapro_Light_Switches.yaml
+  author: Anthony Bahl (@AnthonyBahl)
+
+input:
+  switch:
+    name: Switch
+    description: The switch to create automations for.
+    selector:
+      device:
+        entity:
+          - domain: switch
+            integration: zwave_js
+        filter:
+          - integration: zwave_js
+            manufacturer: UltraPro
+        multiple: true
+
+  single_press_delay:
+    name: Single Press Delay
+    description: Action to run when the switch is pressed once (on).
+    selector:
+      duration:
+        enable_day: true
+  
+  double_press_delay:
+    name: Double Press Delay
+    description: Action to run when the switch is pressed twice (on).
+    selector:
+      duration:
+        enable_day: true
+
+mode: restart
+
+trigger:
+  - platform: device
+    device_id: !input switch
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: "001"
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    value: 0
+    id: single_press_on
+  - platform: device
+    device_id: !input switch
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: "001"
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    value: 3
+    id: double_press_on
+  - platform: device
+    device_id: !input switch
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: "001"
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    value: 4
+    id: triple_press_on
+    
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: single_press_on
+        sequence:
+          - delay: !input single_press_delay
+          - service: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              device_id: !input switch
+
+      - conditions:
+          - condition: trigger
+            id: double_press_on
+        sequence:
+          - delay: !input double_press_delay
+          - service: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              device_id: !input switch
