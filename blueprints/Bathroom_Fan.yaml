@@ -1,0 +1,30 @@
+blueprint:
+  name: Bathroom Fan
+  description: #TODO: Add description
+  domain: automation
+  source_url: #TODO: Add source URL
+  author: Anthon Bahl (@AnthonyBahl)
+
+input:
+  # switch - no default, required - switch to turn on/off
+  
+  # humidity_sensor - no default, required - humidity sensor to monitor
+  # manual_delay - default 30, number of minutes to wait before turning switch back on
+  # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
+  # threshold - default 60, humidity threshold to turn on switch
+  # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
+  # poll_interval - default 60, number of seconds to wait between checking humidity
+  # pura - optional, filter to manufacturer: Pura, pura to turn on/off
+  # pura slot - options: [1,2,none], default none, slot to turn on/off
+
+mode: restart
+
+trigger:
+  # !input switch has been in the on state for !input manual_delay
+  # Humidity Goes Above Threshold on !input humidity_sensor
+  # !input switch has been manually turned off
+
+action:
+  # If !input humidity_sensor is above !input threshold, and !switch is off, turn on !switch after !input turn_back_on_delay seconds
+  # Wait for humidity to drop below !input threshold - !input amount_below_threshold, checking every !input poll_interval seconds
+  # Turn off !input switch
