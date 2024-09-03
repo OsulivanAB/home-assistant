@@ -47,19 +47,8 @@ blueprint:
     # threshold - default 60, humidity threshold to turn on switch
     threshold:
       name: Humidity Threshold
-      description: Humidity threshold to turn on the fan
+      description: Humidity threshold to turn on the fan. When fan is on, it will continue until 2% below this threshold to avoid rapid cycling.
       default: 60
-      selector:
-        number:
-          min: 0
-          max: 100
-          unit_of_measurement: "%"
-      
-    # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
-    amount_below_threshold:
-      name: Amount Below Threshold
-      description: Amount humidity must drop below threshold before turning off the fan (this is used so that the fan doesn't turn off then back on).
-      default: 2
       selector:
         number:
           min: 0
@@ -68,7 +57,6 @@ blueprint:
 
 variables:
   humidity_threshold: !input threshold
-  below_threshold: !input amount_below_threshold
 
 trigger:
   # !input switch has been in the on state for !input manual_delay
@@ -104,7 +92,7 @@ action:
   - wait_for_trigger:
       - platform: numeric_state
         entity_id: !input humidity_sensor
-        below: humidity_threshold | float - below_threshold | float
+        below: {{ humidity_threshold - 2 }}
   # Turn off !input switch
   - action: switch.turn_off
     target:
