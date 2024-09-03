@@ -34,8 +34,6 @@ blueprint:
         duration:
           enable_day: false
           enable_millisecond: false
-      # default:
-      #   minutes: 30
 
     # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
     turn_back_on_delay:
@@ -45,8 +43,6 @@ blueprint:
         duration:
           enable_day: false
           enable_millisecond: false
-      # default:
-      #   seconds: 10
 
     # threshold - default 60, humidity threshold to turn on switch
     threshold:
