@@ -1,0 +1,102 @@
+blueprint:
+  name: Bathroom Fan
+  description: Turn on a fan when humidity is above a threshold and turn off when humidity drops below a threshold.
+  domain: automation
+  source_url: https://github.com/OsulivanAB/home-assistant/blob/bahtroom_fan/blueprints/Bathroom_Fan.yaml
+  author: Anthon Bahl (@AnthonyBahl)
+  homeassistant:
+    min_version: 2024.6.0
+
+  input:
+    # switch - no default, required - switch to turn on/off
+    switch:
+      name: Fan Switch
+      description: Switch entity to turn the fan on/off
+      selector:
+        entity:
+          domain: switch
+
+    # humidity_sensor - no default, required - humidity sensor to monitor
+    humidity_sensor:
+      name: Humidity Sensor
+      description: Humidity sensor entity to monitor
+      selector:
+        entity:
+          filter:
+            domain: sensor
+            device_class: humidity
+
+    # manual_delay - default 30, number of minutes to wait before turning switch back on
+    manual_delay:
+      name: Manual Switch Delay
+      description: Number of minutes to wait before turning the fan off after it is turned on manually (high humidity will override switch being turned off).
+      selector:
+        duration:
+          enable_day: false
+          enable_millisecond: false
+
+    # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
+    turn_back_on_delay:
+      name: Turn Back On Delay
+      description: Number of seconds to wait before turning the fan back on if it is manually turned off while humidity is still above threshold.
+      selector:
+        duration:
+          enable_day: false
+          enable_millisecond: false
+
+    # threshold - default 60, humidity threshold to turn on switch
+    threshold:
+      name: Humidity Threshold
+      description: Humidity threshold to turn on the fan. When fan is on, it will continue until 2% below this threshold to avoid rapid cycling.
+      default: 60
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+
+variables:
+  humidity_threshold: !input threshold
+
+trigger:
+  # !input switch has been in the on state for !input manual_delay
+  - platform: state
+    entity_id: !input switch
+    to: 'on'
+    for: !input manual_delay
+  # Humidity Goes Above Threshold on !input humidity_sensor
+  - platform: numeric_state
+    entity_id: !input humidity_sensor
+    above: !input threshold
+  # !input switch has been manually turned off
+  - platform: state
+    entity_id: !input switch
+    to: 'off'
+
+action:
+  # If !input humidity_sensor is above !input threshold, and !switch is off, turn on !switch after !input turn_back_on_delay seconds
+  - if:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: !input switch
+            state: 'off'
+          - condition: numeric_state
+            entity_id: !input humidity_sensor
+            above: !input threshold
+    then:
+      - action: switch.turn_on
+        target:
+          entity_id: !input switch
+  # Wait for humidity to drop below !input threshold - !input amount_below_threshold, checking every !input poll_interval seconds
+  - wait_for_trigger:
+      - platform: numeric_state
+        entity_id: !input humidity_sensor
+        value_template: "{{ state.state | float + 2 }}"
+        below: !input threshold
+  # Turn off !input switch
+  - action: switch.turn_off
+    target:
+      entity_id: !input switch
+
+mode: restart
