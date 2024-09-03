@@ -1,8 +1,8 @@
 blueprint:
   name: Bathroom Fan
-  description: #TODO: Add description
+  description: Turn on a fan when humidity is above a threshold and turn off when humidity drops below a threshold.
   domain: automation
-  source_url: #TODO: Add source URL
+  source_url: https://github.com/OsulivanAB/home-assistant/blob/bahtroom_fan/blueprints/Bathroom_Fan.yaml
   author: Anthon Bahl (@AnthonyBahl)
   min_version: 2024.6.0
 
@@ -78,7 +78,7 @@ trigger:
   # Humidity Goes Above Threshold on !input humidity_sensor
   - platform: numeric_state
     entity_id: !input humidity_sensor
-    above: {{ humidity_threshold | float }}
+    above: !input threshold
   # !input switch has been manually turned off
   - platform: state
     entity_id: !input switch
