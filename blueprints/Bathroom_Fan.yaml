@@ -2,7 +2,7 @@ blueprint:
   name: Bathroom Fan
   description: Turn on a fan when humidity is above a threshold and turn off when humidity drops below a threshold.
   domain: automation
-  source_url: https://github.com/OsulivanAB/home-assistant/blob/bahtroom_fan/blueprints/Bathroom_Fan.yaml
+  source_url: https://github.com/OsulivanAB/home-assistant/blob/main/blueprints/Bathroom_Fan.yaml
   author: Anthon Bahl (@AnthonyBahl)
   homeassistant:
     min_version: 2024.6.0
