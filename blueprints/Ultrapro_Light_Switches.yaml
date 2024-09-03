@@ -13,9 +13,7 @@ blueprint:
         device:
           entity:
             - domain: switch
-              integration: zwave_js
           filter:
-            - integration: zwave_js
               manufacturer: UltraPro
 
     single_press_delay:
