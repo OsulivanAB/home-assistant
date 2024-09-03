@@ -15,6 +15,7 @@ input:
     selector:
       entity:
         domain: switch
+
   # humidity_sensor - no default, required - humidity sensor to monitor
   humidity_sensor:
     name: Humidity Sensor
@@ -32,8 +33,8 @@ input:
       duration:
         enable_day: false
         enable_millisecond: false
-    default:
-      minutes: 30
+      default:
+        minutes: 30
   # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
   turn_back_on_delay:
     name: Turn Back On Delay
@@ -42,8 +43,8 @@ input:
       duration:
         enable_day: false
         enable_millisecond: false
-    default:
-      seconds: 10
+      default:
+        seconds: 10
   # threshold - default 60, humidity threshold to turn on switch
   threshold:
     name: Humidity Threshold
@@ -53,7 +54,7 @@ input:
         min: 0
         max: 100
         unit_of_measurement: "%"
-    default: 60
+      default: 60
   # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
   amount_below_threshold:
     name: Amount Below Threshold
@@ -63,7 +64,7 @@ input:
         min: 0
         max: 100
         unit_of_measurement: "%"
-    default: 2
+      default: 2
 
 variables:
   humidity_threshold: !input threshold
