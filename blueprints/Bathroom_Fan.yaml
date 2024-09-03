@@ -52,23 +52,23 @@ blueprint:
     threshold:
       name: Humidity Threshold
       description: Humidity threshold to turn on the fan
+      default: 60
       selector:
         number:
           min: 0
           max: 100
           unit_of_measurement: "%"
-      default: 60
       
     # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
     amount_below_threshold:
       name: Amount Below Threshold
       description: Amount humidity must drop below threshold before turning off the fan (this is used so that the fan doesn't turn off then back on).
+      default: 2
       selector:
         number:
           min: 0
           max: 100
           unit_of_measurement: "%"
-      default: 2
 
 variables:
   humidity_threshold: !input threshold
