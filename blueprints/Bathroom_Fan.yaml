@@ -4,7 +4,8 @@ blueprint:
   domain: automation
   source_url: https://github.com/OsulivanAB/home-assistant/blob/bahtroom_fan/blueprints/Bathroom_Fan.yaml
   author: Anthon Bahl (@AnthonyBahl)
-  min_version: 2024.6.0
+  homeassistant:
+    min_version: 2024.6.0
 
 input:
   # switch - no default, required - switch to turn on/off
