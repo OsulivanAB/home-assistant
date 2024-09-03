@@ -7,64 +7,64 @@ blueprint:
   homeassistant:
     min_version: 2024.6.0
 
-input:
-  # switch - no default, required - switch to turn on/off
-  switch:
-    name: Fan Switch
-    description: Switch entity to turn the fan on/off
-    selector:
-      entity:
-        domain: switch
+  input:
+    # switch - no default, required - switch to turn on/off
+    switch:
+      name: Fan Switch
+      description: Switch entity to turn the fan on/off
+      selector:
+        entity:
+          domain: switch
 
-  # humidity_sensor - no default, required - humidity sensor to monitor
-  humidity_sensor:
-    name: Humidity Sensor
-    description: Humidity sensor entity to monitor
-    selector:
-      entity:
-        filter:
-          domain: sensor
-          device_class: humidity
-  # manual_delay - default 30, number of minutes to wait before turning switch back on
-  manual_delay:
-    name: Manual Switch Delay
-    description: Number of minutes to wait before turning the fan off after it is turned on manually (high humidity will override switch being turned off).
-    selector:
-      duration:
-        enable_day: false
-        enable_millisecond: false
-      default:
-        minutes: 30
-  # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
-  turn_back_on_delay:
-    name: Turn Back On Delay
-    description: Number of seconds to wait before turning the fan back on if it is manually turned off while humidity is still above threshold.
-    selector:
-      duration:
-        enable_day: false
-        enable_millisecond: false
-      default:
-        seconds: 10
-  # threshold - default 60, humidity threshold to turn on switch
-  threshold:
-    name: Humidity Threshold
-    description: Humidity threshold to turn on the fan
-    selector:
-      number:
-        min: 0
-        max: 100
-        unit_of_measurement: "%"
-      default: 60
-  # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
-  amount_below_threshold:
-    name: Amount Below Threshold
-    description: Amount humidity must drop below threshold before turning off the fan (this is used so that the fan doesn't turn off then back on).
-    selector:
-      number:
-        min: 0
-        max: 100
-        unit_of_measurement: "%"
-      default: 2
+    # humidity_sensor - no default, required - humidity sensor to monitor
+    humidity_sensor:
+      name: Humidity Sensor
+      description: Humidity sensor entity to monitor
+      selector:
+        entity:
+          filter:
+            domain: sensor
+            device_class: humidity
+    # manual_delay - default 30, number of minutes to wait before turning switch back on
+    manual_delay:
+      name: Manual Switch Delay
+      description: Number of minutes to wait before turning the fan off after it is turned on manually (high humidity will override switch being turned off).
+      selector:
+        duration:
+          enable_day: false
+          enable_millisecond: false
+        default:
+          minutes: 30
+    # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
+    turn_back_on_delay:
+      name: Turn Back On Delay
+      description: Number of seconds to wait before turning the fan back on if it is manually turned off while humidity is still above threshold.
+      selector:
+        duration:
+          enable_day: false
+          enable_millisecond: false
+        default:
+          seconds: 10
+    # threshold - default 60, humidity threshold to turn on switch
+    threshold:
+      name: Humidity Threshold
+      description: Humidity threshold to turn on the fan
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+        default: 60
+    # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
+    amount_below_threshold:
+      name: Amount Below Threshold
+      description: Amount humidity must drop below threshold before turning off the fan (this is used so that the fan doesn't turn off then back on).
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+        default: 2
 
 variables:
   humidity_threshold: !input threshold
