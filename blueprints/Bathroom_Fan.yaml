@@ -57,7 +57,7 @@ blueprint:
           min: 0
           max: 100
           unit_of_measurement: "%"
-      # default: 60
+      default: 60
       
     # amount_below_threshold - default 2%, amount humidity must drop below threshold before turning off switch
     amount_below_threshold:
@@ -68,7 +68,7 @@ blueprint:
           min: 0
           max: 100
           unit_of_measurement: "%"
-      # default: 2
+      default: 2
 
 variables:
   humidity_threshold: !input threshold
