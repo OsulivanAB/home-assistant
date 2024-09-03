@@ -92,7 +92,8 @@ action:
   - wait_for_trigger:
       - platform: numeric_state
         entity_id: !input humidity_sensor
-        below: "{{ humidity_threshold | int - 2 }}"
+        value_template: "{{ state.state | float + 2 }}"
+        below: !input threshold
   # Turn off !input switch
   - action: switch.turn_off
     target:
