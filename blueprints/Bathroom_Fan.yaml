@@ -75,8 +75,7 @@ trigger:
   - platform: state
     entity_id: !input switch
     to: 'on'
-    for:
-      minutes: !input manual_delay
+    for: !input manual_delay
   # Humidity Goes Above Threshold on !input humidity_sensor
   - platform: numeric_state
     entity_id: !input humidity_sensor
