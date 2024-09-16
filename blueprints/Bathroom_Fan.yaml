@@ -89,11 +89,9 @@ action:
         target:
           entity_id: !input switch
   - if:
-      - condition: not
-        conditions:
-          - condition: numeric_state
-            entity_id: !input humidity_sensor
-            above: !input threshold
+      - condition: numeric_state
+        entity_id: !input humidity_sensor
+        above: !input threshold
     then:
   # Wait for humidity to drop below !input threshold - !input amount_below_threshold, checking every !input poll_interval seconds
       - wait_for_trigger:
