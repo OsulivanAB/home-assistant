@@ -1,107 +1,45 @@
 blueprint:
   name: Bathroom Fan
-  description: Turn on a fan when humidity is above a threshold and turn off when humidity drops below a threshold.
+  description: >
+    # 🚿🚽 Bathroom Exhaust Fan
+
+    ** Version 2.0 **
+
+    I created this blueprint based on my experience with short-term rentals at my home. With short stays, you occasionally get tenants who might not be as mindful of upkeep—likely because they’re unfamiliar with the space, right? With that in mind, I’ve worked to make the setup as convenient and intuitive as possible, while still maintaining a sense of luxury. For instance, I've included a feature that triggers an action when the fan is turned on or off. I personally use it to control a [Pura diffuser](https://pura.com/), giving guests peace of mind and ensuring the space stays fresh for whoever comes next 🚽💩.
+
+  Huge thanks to [Blacky](https://community.home-assistant.io/u/blacky/summary) and his blueprints, which helped a lot in creating this blueprint.
+
+  <details>
+    <summary><b>My The Automation Proccess:</b> 👆</summary>
+    
+  </details>  
+
+  Required = *
   domain: automation
   source_url: https://github.com/OsulivanAB/home-assistant/blob/bahtroom_fan/blueprints/Bathroom_Fan.yaml
   author: Anthon Bahl (@AnthonyBahl)
   homeassistant:
-    min_version: 2024.6.0
+    min_version: 2024.9.3
 
   input:
-    # switch - no default, required - switch to turn on/off
-    switch:
-      name: Fan Switch
-      description: Switch entity to turn the fan on/off
-      selector:
-        entity:
-          domain: switch
+    trigger_settings:
+      name: "Auto Triggers *"
+      icon: mdi:cog-outline
+      description: These triggers are automatic and require no intervention by the bathroom user. 🤖
+      collapsed: true
+      input:
+        derivative_sensor:
+          name: Humidity Derivative Sensor *
+          description: Select your humidity derivative sensor.
+            This trigger will be used to determine if someone is showering or not, and will dynamically also tell us when to turn off the fan.
 
-    # humidity_sensor - no default, required - humidity sensor to monitor
-    humidity_sensor:
-      name: Humidity Sensor
-      description: Humidity sensor entity to monitor
-      selector:
-        entity:
-          filter:
-            domain: sensor
-            device_class: humidity
-
-    # manual_delay - default 30, number of minutes to wait before turning switch back on
-    manual_delay:
-      name: Manual Switch Delay
-      description: Number of minutes to wait before turning the fan off after it is turned on manually (high humidity will override switch being turned off).
-      selector:
-        duration:
-          enable_day: false
-          enable_millisecond: false
-
-    # turn_back_on_delay - default 10, number of seconds to wait before turning switch back on
-    turn_back_on_delay:
-      name: Turn Back On Delay
-      description: Number of seconds to wait before turning the fan back on if it is manually turned off while humidity is still above threshold.
-      selector:
-        duration:
-          enable_day: false
-          enable_millisecond: false
-
-    # threshold - default 60, humidity threshold to turn on switch
-    threshold:
-      name: Humidity Threshold
-      description: Humidity threshold to turn on the fan. When fan is on, it will continue until 2% below this threshold to avoid rapid cycling.
-      default: 60
-      selector:
-        number:
-          min: 0
-          max: 100
-          unit_of_measurement: "%"
-
-variables:
-  humidity_threshold: !input threshold
-
-trigger:
-  # !input switch has been in the on state for !input manual_delay
-  - platform: state
-    entity_id: !input switch
-    to: 'on'
-    for: !input manual_delay
-  # Humidity Goes Above Threshold on !input humidity_sensor
-  - platform: numeric_state
-    entity_id: !input humidity_sensor
-    above: !input threshold
-  # !input switch has been manually turned off
-  - platform: state
-    entity_id: !input switch
-    to: 'off'
-
-action:
-  # If !input humidity_sensor is above !input threshold, and !switch is off, turn on !switch after !input turn_back_on_delay seconds
-  - if:
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: !input switch
-            state: 'off'
-          - condition: numeric_state
-            entity_id: !input humidity_sensor
-            above: !input threshold
-    then:
-      - action: switch.turn_on
-        target:
-          entity_id: !input switch
-  - if:
-      - condition: numeric_state
-        entity_id: !input humidity_sensor
-        above: !input threshold
-    then:
-  # Wait for humidity to drop below !input threshold - !input amount_below_threshold, checking every !input poll_interval seconds
-      - wait_for_trigger:
-          - platform: numeric_state
-            entity_id: !input humidity_sensor
-            value_template: "{{ state.state | float + 2 }}"
-            below: !input threshold
-  # Turn off !input switch
-  - action: switch.turn_off
-    target:
-      entity_id: !input switch
-
+            Derivatives are a great way to determine if a sensor is increasing or decreasing.
+            In this case, we are using it to determine if the humidity is increasing or decreasing more rapidly than it normally does.
+            If the humidity derivative is increasing at a rate higher than it typically changes, we can assume someone is showering. 
+            If the himiddity derivative is decreasing at a rate higher than it typically changes, we can they're done.
+            When it returns to a normal rate of change, we can assume the fan is no longer needed.
+          selector:
+            entity:
+              domain: sensor
+              device_class: humidity
 mode: restart
