@@ -1,20 +1,53 @@
 blueprint:
-  name: Bathroom Fan
+  name: Bathroom Fan v2
   description: >
     # 🚿🚽 Bathroom Exhaust Fan
 
     ** Version 2.0 **
 
-    I created this blueprint based on my experience with short-term rentals at my home. With short stays, you occasionally get tenants who might not be as mindful of upkeep—likely because they’re unfamiliar with the space, right? With that in mind, I’ve worked to make the setup as convenient and intuitive as possible, while still maintaining a sense of luxury. For instance, I've included a feature that triggers an action when the fan is turned on or off. I personally use it to control a [Pura diffuser](https://pura.com/), giving guests peace of mind and ensuring the space stays fresh for whoever comes next 🚽💩.
 
-  Huge thanks to [Blacky](https://community.home-assistant.io/u/blacky/summary) and his blueprints, which helped a lot in creating this blueprint.
+    I created this blueprint based on my experience with short-term rentals at my home.
 
-  <details>
-    <summary><b>My The Automation Proccess:</b> 👆</summary>
-    
-  </details>  
+    With short stays, you occasionally get tenants who might not be as mindful of upkeep—likely because they’re unfamiliar with the space, right?
 
-  Required = *
+    With that in mind, I’ve worked to make the setup as convenient and intuitive as possible, while still maintaining a sense of luxury.
+
+    For instance, I've included a feature that triggers an action when the fan is turned on or off. I personally use it to control a [Pura diffuser](https://pura.com/), giving guests peace of mind and ensuring the space stays fresh for whoever comes next 🚽💩.
+
+
+    Huge thanks to [Blacky](https://community.home-assistant.io/u/blacky/summary) and his blueprints, which helped a lot in creating this blueprint.
+
+    <details>
+      <summary><b>My The Automation Proccess:</b> 👈</summary>
+      
+      - **Triggers**
+        - Humidity Rising:  `Humidity Derivative` > 0.25%/min
+        - Humidity Stabalized:   -0.25%/min < `Humidity Derivative` < 0.25%/min
+        - Humidity rises above threshold: `Humidity %` > ` Humidity Threshold`
+        - Humidity falls below threshold: `Humidity %` < ` Humidity Threshold`
+        - Fan switch turns on for `manual delay` minutes
+        - Fan switch turns off  for `manual trigger off delay` seconds
+        - Fan has been on for `safeguard time`
+
+
+        📝 Note - Most triggers also must have been in their state for a set amoutn of time (such as `Trigger on delay`). This ensures things don't turn on and off rapidly.
+      - **Conditions**
+        - Any of the following conditions can be true:
+          - Triggered by Humidity Rising
+          - Triggered by Humidity % Above Max Humidity Threshold,
+          - Triggered by Safeguard
+          - Triggered by Humidity derivative stabalizing and humidity is below `Humidity Threshold`.
+          - Triggered by Humidity % Falling below `Humidity threshold` and humidity derivative is stable
+          - Triggered by fan switch being on for `manual delay` minutes, humidity is below `humidity threshold`, and `humidity derivative` is stable.
+          - Triggered by fan switch turning off and one of the following:
+            - `Humidity derivative` is still > 0.25%/min (still rising)
+            - `Humidity derivative` is still < -0.25%/min (still helping)
+            - `Humidity %` > `threshold` (still too humid)
+
+
+      - **Automation**
+        - When triggered by Humidity above threshold, humidity rising, or switch turned off, then turn on the `fan switch`, otherwise turn off the `fan switch`.
+    </details>
   domain: automation
   source_url: https://github.com/OsulivanAB/home-assistant/blob/bahtroom_fan/blueprints/Bathroom_Fan.yaml
   author: Anthon Bahl (@AnthonyBahl)
@@ -24,8 +57,8 @@ blueprint:
   input:
     trigger_settings:
       name: "Auto Triggers *"
-      icon: mdi:cog-outline
-      description: These triggers are automatic and require no intervention by the bathroom user. 🤖
+      icon: mdi:water-percent
+      description: These are the sensors that will power the automation
       collapsed: true
       input:
         derivative_sensor:
@@ -33,13 +66,316 @@ blueprint:
           description: Select your humidity derivative sensor.
             This trigger will be used to determine if someone is showering or not, and will dynamically also tell us when to turn off the fan.
 
+
             Derivatives are a great way to determine if a sensor is increasing or decreasing.
             In this case, we are using it to determine if the humidity is increasing or decreasing more rapidly than it normally does.
-            If the humidity derivative is increasing at a rate higher than it typically changes, we can assume someone is showering. 
+            If the humidity derivative is increasing at a rate higher than it typically changes, we can assume someone is showering.
             If the himiddity derivative is decreasing at a rate higher than it typically changes, we can they're done.
             When it returns to a normal rate of change, we can assume the fan is no longer needed.
+          default: []
+          selector:
+            entity:
+              domain: sensor
+        humidity_sensor:
+          name: Humidity Sensor (Optional)
+          description: Select the humidity sensor entity.
+
+            This is used to determine the current humidity level in the bathroom.
+          default: []
           selector:
             entity:
               domain: sensor
               device_class: humidity
+        fan_switch:
+          name: Fan Switch *
+          description: Select the switch entity that controls the fan.
+          default: []
+          selector:
+            entity:
+              domain: switch
+    threshold_settings:
+      name: "Threshold Settings"
+      icon: mdi:tune-variant
+      description: Here you can customize the thresholds if you'd like.
+      collapsed: true
+      input:
+        rising_humidity_threshold:
+          name: Rising Humidity Threshold
+          description:
+            Select the humidity rate of change threshold that will trigger the fan to turn on.
+
+
+            The derivative sensor percentage must transition from below this value to above it to trigger the fan.
+          default: 1
+          selector:
+            number:
+              min: 0
+              max: 5
+              step: 0.25
+              unit_of_measurement: "%"
+        falling_humidity_threshold:
+          name: Falling Humidity Threshold
+          description:
+            Select the decreasing humidity rate of change threshold that will trigger the fan to turn off.
+
+
+            When someone showers, the humidity rate of change (derivative) will go positive, when they finish it will go negative.
+            In order for the fan to turn off, the humidity must be below the rising humidity threshold and above the falling humidity threshold.
+            This indicates that the fan is done removing humidity from the air.
+          default: -1
+          selector:
+            number:
+              min: -5
+              max: 0
+              step: 0.25
+              unit_of_measurement: "%"
+        stable_humidity_time:
+          name: Stable Humidity Time
+          description:
+            Select the time in minutes that the humidity must remain stable before the fan turns off.
+            This is to prevent the fan from turning off when the shower ends and the derivative sensor is transitioning from positive to negative.
+          default: 5
+          selector:
+            number:
+              min: 1
+              max: 60
+              step: 1
+              unit_of_measurement: "minutes"
+        max_humidity:
+          name: Max Humidity
+          description: Select the maximum humidity value that will trigger the fan to turn on.
+          default: 80
+          selector:
+            number:
+              min: 1
+              max: 100
+              step: 1
+              unit_of_measurement: "%"
+        trigger_on_delay:
+          name: Trigger on delay
+          description:
+            This is the amount of time that the triggers which turn the fan on must maintain their state before triggering the automation.
+
+            The exception is for the manual switch triggers, which we'll do next.
+
+
+            This is to prevent the fan from toggling rapidly when the values get close to the thresholds.
+          default: 30
+          selector:
+            number:
+              min: 1
+              max: 300
+              step: 1
+              unit_of_measurement: "seconds"
+        manual_trigger_off_delay:
+          name: Manual Off Trigger Delay
+          description: If someone turns the fan off manually, but the room is still humid, the automation will wait this amount of time before turning the fan back on.
+          default: 5
+          selector:
+            number:
+              min: 1
+              max: 120
+              step: 1
+              unit_of_measurement: "seconds"
+        manual_trigger_on_delay:
+          name: Manual On Trigger Delay
+          description:
+            If someone turns the fan on manually, the fan will wait this much time to turn off again.
+
+
+            📝 Note - Humidity sesnors will override this.
+          default: 30
+          selector:
+            number:
+              min: 1
+              max: 120
+              step: 1
+              unit_of_measurement: "minutes"
+        safeguard_delay:
+          name: Safeguard Delay
+          description: This is just a safeguard for the automation failing. If the fan is on for this many minutes, it will turn off.
+          default: 30
+          selector:
+            number:
+              min: 60
+              max: 300
+              step: 5
+              unit_of_measurement: "minutes"
+
 mode: restart
+
+trigger:
+  - alias: Humidity Rising
+    entity_id: !input derivative_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: !input trigger_on_delay
+    above: !input rising_humidity_threshold
+    below: 100
+    id: Humidity Derivative Rising
+    trigger: numeric_state
+
+  - alias: Humidity Stabalized
+    entity_id: !input derivative_sensor
+    for:
+      hours: 0
+      minutes: !input stable_humidity_time
+      seconds: 0
+    above: !input falling_humidity_threshold
+    below: !input rising_humidity_threshold
+    id: Humidity Derivative Stabilized
+    trigger: numeric_state
+
+  - alias: Humidity rises above threshold
+    entity_id: !input humidity_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: !input trigger_on_delay
+    above: !input max_humidity
+    below: 100
+    id: Humidity Above Max Humidity Threshold
+    trigger: numeric_state
+
+  - alias: Humidity falls below threshold
+    entity_id: !input humidity_sensor
+    for:
+      hours: 0
+      minutes: !input stable_humidity_time
+      seconds: 0
+    above: 0
+    below: !input max_humidity
+    id: Humidity Falling
+    trigger: numeric_state
+
+  - alias: Fan switch turns on
+    entity_id:
+      - switch.master_bathroom_fan_switch
+    to: "on"
+    for:
+      hours: 0
+      minutes: !input manual_trigger_on_delay
+      seconds: 0
+    id: Manual On Trigger
+    trigger: state
+
+  - alias: Fan switch turns off
+    entity_id:
+      - switch.master_bathroom_fan_switch
+    to: "off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: !input manual_trigger_off_delay
+    id: Switch Turned Off
+    trigger: state
+
+  - alias: Safeguard Delay
+    trigger: state
+    entity_id:
+      - switch.master_bathroom_fan_switch
+    to: "on"
+    for:
+      hours: 0
+      minutes: !input safeguard_delay
+      seconds: 0
+    id: Safeguard
+
+conditions:
+  - condition: or
+    conditions:
+      - condition: trigger
+        id:
+          - Humidity Above Max Humidity Threshold
+          - Safeguard
+          - Humidity Derivative Rising
+      - condition: and
+        conditions:
+          - condition: trigger
+            id: Humidity Falling
+          - condition: numeric_state
+            entity_id: !input derivative_sensor
+            above: !input falling_humidity_threshold
+            below: !input rising_humidity_threshold
+        alias: >-
+          Triggered by Humidity % Falling below { Humidity threshold } and
+          humidity derivative is stable
+      - condition: and
+        conditions:
+          - condition: trigger
+            id: Humidity Derivative Stabilized
+          - condition: numeric_state
+            entity_id: !input humidity_sensor
+            above: 0
+            below: !input max_humidity
+        alias: >-
+          Triggered by Humidity derivative stabalizing and humidity is below {
+          Humidity Threshold }
+      - condition: and
+        conditions:
+          - condition: trigger
+            id: Manual On Trigger
+          - condition: numeric_state
+            entity_id: !input derivative_sensor
+            above: !input falling_humidity_threshold
+            below: !input rising_humidity_threshold
+          - condition: numeric_state
+            entity_id: !input humidity_sensor
+            above: 0
+            below: !input max_humidity
+        alias: >-
+          Triggered by fan switch being on for { manual delay } minutes,
+          humidity is below { humidity threshold }, and humidity derivative is
+          stable.
+      - alias: Turned off early
+        condition: and
+        conditions:
+          - condition: trigger
+            id:
+              - Switch Turned Off
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: !input derivative_sensor
+                above: !input rising_humidity_threshold
+                below: 100
+                alias: Humidity Still Rising
+              - condition: numeric_state
+                entity_id: !input derivative_sensor
+                above: -100
+                below: !input falling_humidity_threshold
+                alias: Fan Still Helping
+              - condition: numeric_state
+                entity_id: !input humidity_sensor
+                below: 100
+                above: !input max_humidity
+                alias: Humidity Over Max
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Humidity Above Max Humidity Threshold
+              - Switch Turned Off
+              - Humidity Derivative Rising
+        sequence:
+          - action: switch.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: !input fan_switch
+      - conditions:
+          - condition: trigger
+            id:
+              - Manual On Trigger
+              - Humidity Derivative Falling
+              - Humidity Falling
+              - Safeguard
+        sequence:
+          - action: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: !input fan_switch
