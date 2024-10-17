@@ -251,7 +251,7 @@ trigger:
 
   - alias: Fan switch turns on
     entity_id:
-      - switch.master_bathroom_fan_switch
+      - !input fan_switch
     to: "on"
     for:
       hours: 0
@@ -262,7 +262,7 @@ trigger:
 
   - alias: Fan switch turns off
     entity_id:
-      - switch.master_bathroom_fan_switch
+      - !input fan_switch
     to: "off"
     for:
       hours: 0
@@ -274,7 +274,7 @@ trigger:
   - alias: Safeguard Delay
     trigger: state
     entity_id:
-      - switch.master_bathroom_fan_switch
+      - !input fan_switch
     to: "on"
     for:
       hours: 0
