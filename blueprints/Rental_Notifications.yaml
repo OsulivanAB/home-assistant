@@ -107,9 +107,9 @@ actions:
     data:
       actions:
         - action: "{{ action_confirm }}"
-          title: !input confirm_text
+          title: Complete
         - action: "{{ action_dismiss }}"
-          title: !input dismiss_text
+          title: Snooze
   - alias: Wait for response
     wait_for_trigger:
       - event_type: mobile_app_notification_action
