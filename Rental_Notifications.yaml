@@ -1,0 +1,121 @@
+blueprint:
+  domain: automation
+  # source_url:
+  author: Anthon Bahl (@AnthonyBahl)
+  name: Rental Notifications 📱
+  homeassistant:
+    min_version: 2024.9.3
+  description: >
+    # Rental Notifications 📱
+
+    ** Version 0.1.0 **
+
+
+    I created this blueprint to send myself notification when things around the house need to be addressed.
+
+    <details>
+      <summary><b>Changelog</b> 👈</summary>
+    </details>
+
+    <details>
+      <summary><b>Changelog</b> 👈</summary>
+      <ul>
+        <li>Version 0.1.0</li>
+        <ul>
+          <li>Initial Release</li>
+        </ul>
+      </ul>
+    </details>
+  
+  input:
+    date_last_completed:
+      name: Date Last Completed
+      description: Date helper to store the date the task was last completed.
+      selector:
+        entity:
+          domain: input_datetime
+
+mode: single
+
+triggers:
+  - at: "09:00:00"
+    alias: Daily at 9 AM
+    trigger: time
+conditions:
+  - alias: Verify Day of the Week
+    condition: time
+    weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+  - alias: Check if it's time to notify
+    condition: template
+    value_template: >-
+      {{ ( now() | as_timestamp) - (
+      state_attr('input_datetime.upstairs_bathroom_drain_maintenance',
+      'timestamp') | int) > 182 * 86400 }}
+actions:
+  - alias: Set up variables for the actions
+    variables:
+      action_complete: "{{ 'COMPLETE_' ~ context.id }}"
+      action_snooze: "{{ 'SNOOZE_' ~ context.id }}"
+  - alias: Send notification
+    data:
+      message: Upstairs bathroom drain maintenance is due.
+      title: Rental Maintenance
+      data:
+        actions:
+          - action: "{{ action_complete }}"
+            title: Complete
+          - action: "{{ action_snooze }}"
+            title: Snooze 💤
+    action: notify.mobile_app_anthony_s_phone
+  - alias: Wait for response
+    wait_for_trigger:
+      - event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_complete }}"
+        trigger: event
+      - event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_snooze }}"
+        trigger: event
+      - trigger: event
+        event_type: mobile_app_notification_cleared
+        event_data:
+          action_1_key: "{{ action_complete }}"
+  - alias: Perform the action
+    choose:
+      - conditions:
+          - alias: Complete Button Pressed
+            condition: template
+            value_template: "{{ wait.trigger.event.data.action == action_complete }}"
+        sequence:
+          - alias: Set date last completed date to today.
+            action: input_datetime.set_datetime
+            data:
+              date: "{{ now().date().strftime('%Y-%m-%d') }}"
+            target:
+              entity_id: input_datetime.upstairs_bathroom_drain_maintenance
+      - conditions:
+          - alias: Snooze Button Pressed
+            condition: template
+            value_template: "{{ wait.trigger.event.data.action == action_snooze }}"
+        sequence:
+          - alias: Set date to delay next notification by 3 days
+            action: input_datetime.set_datetime
+            data:
+              date: >-
+                {{ ( now().date() - timedelta( days=182 ) + timedelta( days=3 )
+                ).strftime('%Y-%m-%d') }}
+            target:
+              entity_id: input_datetime.upstairs_bathroom_drain_maintenance
+      - conditions:
+          - alias: Notification Cleared
+            condition: template
+            value_template: >-
+              {{ wait.trigger.event.event_type ==
+              'mobile_app_notification_cleared' }}
+        sequence: []
