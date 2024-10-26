@@ -35,6 +35,13 @@ blueprint:
 
     \* Required
   input:
+    notify_device:
+      name: Device to notify
+      description: Device needs to run the official Home Assistant app to receive notifications.
+      selector:
+        device:
+          filter:
+            integration: mobile_app
     trigger_settings:
       name: Trigger Settings *
       icon: mdi:ear-hearing
@@ -50,6 +57,19 @@ blueprint:
           selector:
             time: 
           default: "09:00:00"
+    condition_settings:
+      name: Condition Settings *
+      icon: mdi:check-circle
+      description: Conditions that must be met for the notification to be sent.
+      collapsed: true
+      input:
+        automation_conditions:
+          name: Automation Conditions *
+          description: >
+            Conditions that must be met for the notification to be sent.
+          selector:
+            condition:
+          default: []
 
 mode: single
 
@@ -57,7 +77,7 @@ triggers:
   - at: !input trigger_time
     alias: Daily at !input trigger_time
     trigger: time
-    
+
 conditions:
   - alias: Verify Day of the Week
     condition: time
@@ -77,18 +97,19 @@ actions:
   - alias: Set up variables for the actions
     variables:
       action_complete: "{{ 'COMPLETE_' ~ context.id }}"
-      action_snooze: "{{ 'SNOOZE_' ~ context.id }}"
+      action_snooze: "{{ 'SNOOZE_' ~ context.id }}"    
   - alias: Send notification
+    domain: mobile_app
+    type: notify
+    device_id: !input notify_device
+    title: Rental Maintenance
+    message: Upstairs bathroom drain maintenance is due.
     data:
-      message: Upstairs bathroom drain maintenance is due.
-      title: Rental Maintenance
-      data:
-        actions:
-          - action: "{{ action_complete }}"
-            title: Complete
-          - action: "{{ action_snooze }}"
-            title: Snooze 💤
-    action: notify.mobile_app_anthony_s_phone
+      actions:
+        - action: "{{ action_confirm }}"
+          title: !input confirm_text
+        - action: "{{ action_dismiss }}"
+          title: !input dismiss_text
   - alias: Wait for response
     wait_for_trigger:
       - event_type: mobile_app_notification_action
