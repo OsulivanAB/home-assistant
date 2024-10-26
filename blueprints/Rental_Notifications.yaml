@@ -19,7 +19,7 @@ blueprint:
       - **Triggers**
       - **Conditions**
       - **Actions**
-      
+
     </details>
 
     <details>
@@ -31,14 +31,16 @@ blueprint:
         </ul>
       </ul>
     </details>
-  
+
+
+    * Required
   input:
-    date_last_completed:
-      name: Date Last Completed
-      description: Date helper to store the date the task was last completed.
+    trigger_time:
+      name: Time to Trigger *
+      description: The time of day to trigger the notification.
       selector:
-        entity:
-          domain: input_datetime
+        time: 
+      default: "09:00:00"
 
 mode: single
 
