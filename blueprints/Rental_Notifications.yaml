@@ -101,7 +101,6 @@ blueprint:
           selector:
             entity:
               domain: input_datetime
-              integration: input_datetime
         days_between_notifications:
           name: Days between notifications
           description: >
