@@ -72,23 +72,23 @@ blueprint:
           name: Days of the Week
           description: Days on which the automation should trigger.
           default:
+            - sun
             - mon
             - tue
             - wed
             - thu
             - fri
             - sat
-            - sun
           selector:
             select:
               options:
+                - sun
                 - mon
                 - tue
                 - wed
                 - thu
                 - fri
                 - sat
-                - sun
               mode: list
               multiple: true
         date_last_completed_helper:
@@ -101,6 +101,7 @@ blueprint:
           selector:
             entity:
               domain: input_datetime
+          default: []
         days_between_notifications:
           name: Days between notifications
           description: >
