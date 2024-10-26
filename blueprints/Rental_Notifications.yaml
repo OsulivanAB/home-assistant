@@ -4,7 +4,7 @@ blueprint:
   author: Anthon Bahl (@AnthonyBahl)
   name: Rental Notifications 📱
   homeassistant:
-    min_version: 2024.9.3
+    min_version: 2024.6.0
   description: >
     # Rental Notifications 📱
 
@@ -33,21 +33,31 @@ blueprint:
     </details>
 
 
-    * Required
+    \* Required
   input:
-    trigger_time:
-      name: Time to Trigger *
-      description: The time of day to trigger the notification.
-      selector:
-        time: 
-      default: "09:00:00"
+    trigger_settings:
+      name: Trigger Settings *
+      icon: mdi:ear-hearing
+      description: Settings for what will trigger the notification.
+      collapsed: true
+      input:
+        trigger_time:
+          name: Time to Trigger *
+          description: >
+            The time of day to trigger the notification.
+
+            📝 Note - This will fire every day, however you can configure it to only happen on certain days in the conditions section.
+          selector:
+            time: 
+          default: "09:00:00"
 
 mode: single
 
 triggers:
-  - at: "09:00:00"
-    alias: Daily at 9 AM
+  - at: !input trigger_time
+    alias: Daily at !input trigger_time
     trigger: time
+    
 conditions:
   - alias: Verify Day of the Week
     condition: time
