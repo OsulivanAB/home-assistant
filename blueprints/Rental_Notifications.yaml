@@ -56,7 +56,7 @@ blueprint:
       name: Trigger Settings *
       icon: mdi:ear-hearing
       description: Settings for what will trigger the notification.
-      collapsed: true
+      collapsed: false
       input:
         trigger_time:
           name: Time to Trigger *
@@ -118,7 +118,7 @@ blueprint:
       name: Notification Settings *
       icon: mdi:bell
       description: Settings for the notification.
-      collapsed: true
+      collapsed: false
       input:
         message_title:
           name: Message Title
@@ -127,7 +127,6 @@ blueprint:
         message_body:
           name: Message Body
           description: Body of the notification.
-          default: []
         snooze_duration:
           name: Snooze Duration
           description: >
