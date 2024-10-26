@@ -31,6 +31,7 @@ blueprint:
 
     </details>
 
+
     <details>
       <summary><b>Changelog</b> 👈</summary>
       <ul>
@@ -173,9 +174,9 @@ actions:
     message: !input message_body
     data:
       actions:
-        - action: "{{ action_confirm }}"
+        - action: "{{ action_complete }}"
           title: Complete
-        - action: "{{ action_dismiss }}"
+        - action: "{{ action_snooze }}"
           title: Snooze
   - alias: Wait for response
     wait_for_trigger:
