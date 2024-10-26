@@ -17,8 +17,17 @@ blueprint:
       <summary><b>My The Automation Proccess:</b> 👈</summary>
 
       - **Triggers**
+        - **Time of Day** - This is the time of day that the notification will trigger.
       - **Conditions**
+        - **Days of the Week** - This is the days of the week that the notification will trigger.
+        - **Check if it's time to notify** - This is to check if the notification has already been sent.
       - **Actions**
+        - **Send Notification** - This is to send the notification to the device.
+        - **Wait for Response** - This is to wait for the user to respond to the notification.
+        - **Perform the Action** - This is to perform the action based on the user's response.
+          - **Complete Button Pressed** - This is to set the date last completed to today.
+          - **Snooze Button Pressed** - This is to set the date to delay the next notification by the number of days specified.
+          - **Notification Cleared** - This is to do nothing if the notification is cleared.
 
     </details>
 
@@ -53,25 +62,89 @@ blueprint:
           description: >
             The time of day to trigger the notification.
 
+
             📝 Note - This will fire every day, however you can configure it to only happen on certain days in the conditions section.
           selector:
             time: 
           default: "09:00:00"
-    condition_settings:
-      name: Condition Settings *
-      icon: mdi:check-circle
-      description: Conditions that must be met for the notification to be sent.
+        days_of_week:
+          name: Days of the Week
+          description: Days on which the automation should trigger.
+          default:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+            - sun
+          selector:
+            select:
+              options:
+                - mon
+                - tue
+                - wed
+                - thu
+                - fri
+                - sat
+                - sun
+              mode: list
+              multiple: true
+        date_last_completed_helper:
+          name: Date Helper for last completed.
+          description: >
+            Date Helper which will be updated when the action is completed.
+
+
+            📝 Note - To create a date helper, go to settings -> helpers -> add helper -> date and time.
+          selector:
+            entity:
+              domain: input_datetime
+              integration: input_datetime
+        days_between_notifications:
+          name: Days between notifications
+          description: >
+            The number of days between notifications.
+          selector:
+            number:
+              min: 0
+              max: 1095
+              mode: box
+              step: 1
+              unit_of_measurement: days
+              default: 182
+    notification_settings:
+      name: Notification Settings *
+      icon: mdi:bell
+      description: Settings for the notification.
       collapsed: true
       input:
-        automation_conditions:
-          name: Automation Conditions *
+        message_title:
+          name: Message Title
+          description: Title of the notification.
+          default: Rental Maintenance
+        message_body:
+          name: Message Body
+          description: Body of the notification.
+          default: Upstairs bathroom drain maintenance is due.
+        snooze_duration:
+          name: Snooze Duration
           description: >
-            Conditions that must be met for the notification to be sent.
+            The number of days to snooze the notification for.
           selector:
-            condition:
-          default: []
+            number:
+              min: 0
+              max: 62
+              mode: box
+              step: 1
+              unit_of_measurement: days
+              default: 3
 
 mode: single
+
+variables:
+  days_between_notifications: !input days_between_notifications
+  snooze_duration: !input snooze_duration
 
 triggers:
   - at: !input trigger_time
@@ -81,18 +154,13 @@ triggers:
 conditions:
   - alias: Verify Day of the Week
     condition: time
-    weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
+    weekday: !input days_of_week
   - alias: Check if it's time to notify
     condition: template
     value_template: >-
-      {{ ( now() | as_timestamp) - (
-      state_attr('input_datetime.upstairs_bathroom_drain_maintenance',
-      'timestamp') | int) > 182 * 86400 }}
+      {{ (now().date() - timedelta(days= (days_between_notifications | int) ))
+      <= as_datetime(states(inputs.date_last_completed_helper)).date() }}
+
 actions:
   - alias: Set up variables for the actions
     variables:
@@ -102,8 +170,8 @@ actions:
     domain: mobile_app
     type: notify
     device_id: !input notify_device
-    title: Rental Maintenance
-    message: Upstairs bathroom drain maintenance is due.
+    title: !input message_title
+    message: !input message_body
     data:
       actions:
         - action: "{{ action_confirm }}"
@@ -136,7 +204,7 @@ actions:
             data:
               date: "{{ now().date().strftime('%Y-%m-%d') }}"
             target:
-              entity_id: input_datetime.upstairs_bathroom_drain_maintenance
+              entity_id: !input date_last_completed_helper
       - conditions:
           - alias: Snooze Button Pressed
             condition: template
@@ -146,10 +214,11 @@ actions:
             action: input_datetime.set_datetime
             data:
               date: >-
-                {{ ( now().date() - timedelta( days=182 ) + timedelta( days=3 )
+                {{ ( now().date() - timedelta( days= (days_between_notifications
+                | int) ) + timedelta( days= (snooze_duration | int) )
                 ).strftime('%Y-%m-%d') }}
             target:
-              entity_id: input_datetime.upstairs_bathroom_drain_maintenance
+              entity_id: !input date_last_completed_helper
       - conditions:
           - alias: Notification Cleared
             condition: template
