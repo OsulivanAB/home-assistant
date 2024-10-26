@@ -126,7 +126,6 @@ blueprint:
         message_body:
           name: Message Body
           description: Body of the notification.
-          default: Upstairs bathroom drain maintenance is due.
         snooze_duration:
           name: Snooze Duration
           description: >
