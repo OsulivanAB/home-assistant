@@ -8,13 +8,18 @@ blueprint:
   description: >
     # Rental Notifications 📱
 
-    ** Version 0.1.0 **
+    <b>Version 0.1.0</b>
 
 
     I created this blueprint to send myself notification when things around the house need to be addressed.
 
     <details>
-      <summary><b>Changelog</b> 👈</summary>
+      <summary><b>My The Automation Proccess:</b> 👈</summary>
+
+      - **Triggers**
+      - **Conditions**
+      - **Actions**
+      
     </details>
 
     <details>
