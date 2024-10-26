@@ -112,7 +112,7 @@ blueprint:
               mode: box
               step: 1
               unit_of_measurement: days
-              default: 182
+          default: 182
     notification_settings:
       name: Notification Settings *
       icon: mdi:bell
@@ -138,7 +138,7 @@ blueprint:
               mode: box
               step: 1
               unit_of_measurement: days
-              default: 3
+          default: 3
 
 mode: single
 
