@@ -127,6 +127,7 @@ blueprint:
         message_body:
           name: Message Body
           description: Body of the notification.
+          default: ""
         snooze_duration:
           name: Snooze Duration
           description: >
