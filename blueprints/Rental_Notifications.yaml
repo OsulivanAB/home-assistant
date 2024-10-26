@@ -180,9 +180,6 @@ actions:
           title: Snooze
   - alias: Wait for response
     wait_for_trigger:
-      timeout:
-        hours: 48
-      continue_on_timeout: true
       - event_type: mobile_app_notification_action
         event_data:
           action: "{{ action_complete }}"
@@ -195,6 +192,12 @@ actions:
         event_type: mobile_app_notification_cleared
         event_data:
           action_1_key: "{{ action_complete }}"
+    timeout:
+      hours: 48
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: false
   - alias: Perform the action
     choose:
       - conditions:
