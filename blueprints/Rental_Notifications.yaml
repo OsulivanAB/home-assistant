@@ -145,6 +145,7 @@ mode: single
 variables:
   days_between_notifications: !input days_between_notifications
   snooze_duration: !input snooze_duration
+  date_last_completed_helper: !input date_last_completed_helper
 
 triggers:
   - at: !input trigger_time
@@ -159,7 +160,7 @@ conditions:
     condition: template
     value_template: >-
       {{ (now().date() - timedelta(days= (days_between_notifications | int) ))
-      <= as_datetime(states(inputs.date_last_completed_helper)).date() }}
+      <= as_datetime(states(date_last_completed_helper)).date() }}
 
 actions:
   - alias: Set up variables for the actions
