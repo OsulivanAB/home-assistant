@@ -157,6 +157,7 @@ conditions:
     condition: time
     weekday: !input days_of_week
   - alias: Check if it's time to notify
+    condition: template
     value_template: >-
       {{ (now().date() - as_datetime(states(date_last_completed_helper)).date())
       >= timedelta(days= (days_between_notifications | int)) }}
