@@ -201,8 +201,42 @@ blueprint:
               max: 300
               step: 5
               unit_of_measurement: "minutes"
+    light_fan_combo_settings:
+      name: "Light/Fan Combo Settings"
+      icon: mdi:lightbulb
+      description: These settings are applicable only if you have a light that turns on when the fan turns on.
+
+        By Default the lights will turn on and off with the fan. If you want to control the lights independantly then you can enable this feature.
+      collapsed: true
+      input:
+        use_light_fan_combo_settings:
+          name: Use Light/Fan Combo Settings
+          description: This feature allows for lights to operate independantly from the fan.
+
+
+            Regardless of whether or not you enable this feature, the light will turn on and off with your fan. However, if you choose option 1,
+            then if the fan is turned off manually before the humidity thresholds have been met then the fan will be turned back on but the lights will not.
+          default: disable_light_settings
+          selector:
+            select:
+              options:
+                - label: 1 - Enable Light Settings
+                  value: "enable_light_settings"
+                - label: 2 - Disable Light Settings
+                  value: "disable_light_settings"
+        light_entities:
+          name: Light Entities
+          description: Select the light entities that will be controlled by the fan.
+          default: []
+          selector:
+            entity:
+              domain: light
 
 mode: restart
+
+variables:
+  use_light_fan_combo_settings: !input use_light_fan_combo_settings
+  light_entities: !input light_entities
 
 trigger:
   - alias: Humidity Rising
@@ -362,10 +396,19 @@ actions:
               - Humidity Derivative Rising
         sequence:
           - action: switch.turn_on
-            metadata: {}
-            data: {}
             target:
               entity_id: !input fan_switch
+          - if:
+              - condition: and
+                conditions:
+                - condition: trigger
+                  id: Switch Turned Off
+                - condition: template
+                  value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
+            then:
+              - action: light.turn_off
+                target:
+                  entity_id: "{{ light_entities }}"
       - conditions:
           - condition: trigger
             id:
@@ -375,7 +418,5 @@ actions:
               - Safeguard
         sequence:
           - action: switch.turn_off
-            metadata: {}
-            data: {}
             target:
               entity_id: !input fan_switch
