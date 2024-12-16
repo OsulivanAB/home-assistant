@@ -404,6 +404,9 @@ actions:
           - condition: template
             value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
         sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: !input fan_switch
           - action: light.turn_off
             target:
               entity_id: "{{ light_entities }}"
