@@ -401,8 +401,9 @@ actions:
           - if:
               - condition: and
                 conditions:
-                - condition: trigger
-                  id: Switch Turned Off
+                  - condition: trigger
+                    id:
+                      - Switch Turned Off
                 - condition: template
                   value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
             then:
