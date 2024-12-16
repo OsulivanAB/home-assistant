@@ -392,23 +392,21 @@ actions:
           - condition: trigger
             id:
               - Humidity Above Max Humidity Threshold
-              - Switch Turned Off
               - Humidity Derivative Rising
         sequence:
           - action: switch.turn_on
             target:
               entity_id: !input fan_switch
-          - if:
-              - condition: and
-                conditions:
-                - condition: trigger
-                  id: Switch Turned Off
-                - condition: template
-                  value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
-            then:
-              - action: light.turn_off
-                target:
-                  entity_id: "{{ light_entities }}"
+      - conditions:
+          - condition: trigger
+            id:
+              - Switch Turned Off
+          - condition: template
+            value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
+        sequence:
+          - action: light.turn_off
+            target:
+              entity_id: "{{ light_entities }}"
       - conditions:
           - condition: trigger
             id:
