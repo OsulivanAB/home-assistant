@@ -178,7 +178,7 @@ blueprint:
               step: 1
               unit_of_measurement: "seconds"
         manual_trigger_on_delay:
-          name: Manual On Trigger Delay
+          name: Manual On Trigger Plus Delay Delay
           description:
             If someone turns the fan on manually, the fan will wait this much time to turn off again.
 
@@ -283,7 +283,7 @@ trigger:
     id: Humidity Falling
     trigger: numeric_state
 
-  - alias: Fan switch turns on
+  - alias: Fan switch turns on + Delay
     entity_id:
       - !input fan_switch
     to: "on"
@@ -291,7 +291,7 @@ trigger:
       hours: 0
       minutes: !input manual_trigger_on_delay
       seconds: 0
-    id: Manual On Trigger
+    id: Manual On Trigger Plus Delay
     trigger: state
 
   - alias: Fan switch turns off
@@ -349,7 +349,7 @@ conditions:
       - condition: and
         conditions:
           - condition: trigger
-            id: Manual On Trigger
+            id: Manual On Trigger Plus Delay
           - condition: numeric_state
             entity_id: !input derivative_sensor
             above: !input falling_humidity_threshold
@@ -393,27 +393,29 @@ actions:
             id:
               - Humidity Above Max Humidity Threshold
               - Humidity Derivative Rising
+              - Switch Turned Off
         sequence:
           - action: switch.turn_on
             target:
               entity_id: !input fan_switch
+          - if:
+              - condition: trigger
+                id:
+                  - Switch Turned Off
+              - condition: template
+                value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
+            then:
+              - action: light.turn_off
+                target:
+                  entity_id: "{{ light_entities }}"
       - conditions:
           - condition: trigger
             id:
-              - Switch Turned Off
-          - condition: template
-            value_template: "{{ use_light_fan_combo_settings == 'enable_light_settings' }}"
-        sequence:
-          - action: light.turn_off
-            target:
-              entity_id: "{{ light_entities }}"
-      - conditions:
-          - condition: trigger
-            id:
-              - Manual On Trigger
+              - Manual On Trigger Plus Delay
               - Humidity Derivative Falling
               - Humidity Falling
               - Safeguard
+              - Humidity Derivative Stabilized
         sequence:
           - action: switch.turn_off
             target:
