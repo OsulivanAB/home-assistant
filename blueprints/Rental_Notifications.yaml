@@ -260,11 +260,11 @@ actions:
                 ).strftime('%Y-%m-%d') }}
             target:
               entity_id: !input date_last_completed_helper
-      - alias: Dismiss notifications on all devices
-        repeat:
-          for_each: !input notify_device
-          sequence:
-            - service: mobile_app.clear_notification
-              data:
-                device_id: "{{ repeat.item }}"
-                tag: "{{ context.id }}"
+  - alias: Dismiss notifications on all devices
+    repeat:
+      for_each: !input notify_device
+      sequence:
+        - service: mobile_app.clear_notification
+          data:
+            device_id: "{{ repeat.item }}"
+            tag: "{{ context.id }}"
