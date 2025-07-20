@@ -8,7 +8,7 @@ blueprint:
   description: >
     # Rental Notifications 📱
 
-    <b>Version 1.1.0</b>
+    <b>Version 1.2.0</b>
 
 
     I created this blueprint to send myself notification when things around the house need to be addressed.
@@ -35,6 +35,10 @@ blueprint:
       <details>
         <summary><b>Changelog</b> 👈</summary>
         <ul>
+        <li>Version 1.2.0</li>
+        <ul>
+          <li>Dismissed notification now behaves the same as the Snooze button (delays next notification by snooze duration)</li>
+        </ul>
         <li>Version 1.1.0</li>
         <ul>
           <li>Added support for multiple notification devices</li>
@@ -245,7 +249,16 @@ actions:
             value_template: >-
               {{ wait.trigger.event.event_type ==
               'mobile_app_notification_cleared' }}
-        sequence: []
+        sequence:
+          - alias: Set date to delay next notification by 3 days
+            action: input_datetime.set_datetime
+            data:
+              date: >-
+                {{ ( now().date() - timedelta( days= (days_between_notifications
+                | int) ) + timedelta( days= (snooze_duration | int) )
+                ).strftime('%Y-%m-%d') }}
+            target:
+              entity_id: !input date_last_completed_helper
       - alias: Dismiss notifications on all devices
         repeat:
           for_each: !input notify_device
