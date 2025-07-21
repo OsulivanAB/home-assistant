@@ -185,18 +185,18 @@ actions:
     repeat:
       for_each: !input notify_device
       sequence:
-        - domain: mobile_app
-          type: notify
-          device_id: "{{ repeat.item }}"
-          title: !input message_title
-          message: !input message_body
+        - service: mobile_app.notify
           data:
-            tag: "{{ context.id }}"
-            actions:
-              - action: "{{ action_complete }}"
-                title: Complete
-              - action: "{{ action_snooze }}"
-                title: Snooze
+            device_id: "{{ repeat.item }}"
+            title: !input message_title
+            message: !input message_body
+            data:
+              tag: "{{ context.id }}"
+              actions:
+                - action: "{{ action_complete }}"
+                  title: Complete
+                - action: "{{ action_snooze }}"
+                  title: Snooze
   - alias: Wait for response from any device
     wait_for_trigger:
       - platform: event
